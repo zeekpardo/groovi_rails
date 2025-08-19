@@ -1,0 +1,18 @@
+<%
+  field_name_prefix = local_assigns.fetch(:field_name_prefix, "shortened_link")
+  value = local_assigns.fetch(:value, "")
+  placeholder = local_assigns.fetch(:placeholder, "https://example.com")
+  required = local_assigns.fetch(:required, false)
+%>
+
+<div class="form-group">
+  <%= label_tag "#{field_name_prefix}_target_value", t("qr_codes.form.target_url") %>
+  <%= url_field_tag "#{field_name_prefix}[target_value]", 
+      value,
+      class: "form-control",
+      placeholder: placeholder,
+      required: required,
+      data: { 
+        action: "input->schema-switcher#updatePreview"
+      } %>
+</div>

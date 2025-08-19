@@ -1,0 +1,41 @@
+#tab
+<!-- BEGIN app/views/components/_tabs.html.erb --><div data-controller="tabs"
+     data-tabs-active-tab-class="tab"
+     data-tabs-inactive-tab-class="inactive">
+
+  <select id="" class="sm:hidden mb-4" data-action="tabs#change"><option value="Tab 1">Tab 1</option>
+<option value="Tab 2">Tab 2</option>
+<option value="Tab 3">Tab 3</option></select>
+
+  <nav class="tab-nav" aria-label="Tabs">
+      <a href="#"
+          data-tabs-target="tab"
+          data-action="click->tabs#change:prevent">
+        Tab 1
+      </a>
+      <a href="#"
+          data-tabs-target="tab"
+          data-action="click->tabs#change:prevent">
+        Tab 2
+      </a>
+      <a href="#"
+          data-tabs-target="tab"
+          data-action="click->tabs#change:prevent">
+        Tab 3
+      </a>
+  </nav>
+
+    <div class="hidden" data-tabs-target="panel">
+          Tab panel 1
+
+    </div>
+    <div class="hidden" data-tabs-target="panel">
+          Tab panel 2
+
+    </div>
+    <div class="hidden" data-tabs-target="panel">
+          Tab panel 3
+
+    </div>
+</div>
+<!-- END app/views/components/_tabs.html.erb -->

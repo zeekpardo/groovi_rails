@@ -1,0 +1,235 @@
+<% content_for :title, @qr_code.name %>
+
+<div class="container mx-auto p-4">
+  <div class="mb-6">
+    <%= link_to t("common.back"), qr_codes_path, 
+        class: "btn btn-secondary btn-sm mb-4" %>
+    
+    <div class="flex justify-between items-start">
+      <div>
+        <h1 class="text-3xl font-bold mb-2"><%= @qr_code.name %></h1>
+        <div class="flex items-center space-x-2 mb-4">
+          <span class="pill pill-sm pill-primary">
+            <%= @qr_code.linkable.class.name.humanize %>
+          </span>
+          <% if @qr_code.linkable.respond_to?(:schema_type) %>
+            <span class="pill pill-sm pill-info">
+              <%= t("shortened_links.form.schema_types.#{@qr_code.linkable.schema_type}") %>
+            </span>
+          <% end %>
+        </div>
+      </div>
+      
+      <div class="space-x-2">
+        <% if @qr_code.has_playlist? %>
+          <%= link_to "Manage Playlist", qr_code_playlist_path(@qr_code), 
+              class: "btn btn-primary" %>
+        <% else %>
+          <%= button_to "Create Playlist", qr_code_playlist_path(@qr_code), 
+              method: :post,
+              class: "btn btn-primary" %>
+        <% end %>
+        <%= link_to t("common.edit"), edit_qr_code_path(@qr_code), 
+            class: "btn btn-secondary" %>
+        <%= button_to t("common.delete"), qr_code_path(@qr_code), 
+            method: :delete, 
+            data: { turbo_confirm: t("common.confirm_delete") },
+            class: "btn btn-danger" %>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid lg:grid-cols-2 gap-8">
+    <!-- QR Code Display -->
+    <div class="card">
+      <h3 class="mb-4"><%= t("qr_codes.show.qr_code") %></h3>
+      
+      <div class="mb-6">
+        <%= render QrCodeComponent.new(
+              data: @qr_code.linkable.full_url,
+              size: 300,
+              foreground_color: @design_settings['foreground_color'],
+              background_color: @design_settings['background_color'],
+              dot_style: @design_settings['dot_style'],
+              corner_style: @design_settings['corner_style'],
+              container_class: "qr-show-display mx-auto"
+            ) do |component| %>
+          <!-- QR Code for <%= @qr_code.name %> -->
+        <% end %>
+      </div>
+
+      <!-- Download Options -->
+      <div class="space-y-2">
+        <h4 class="font-medium mb-2"><%= t("qr_codes.show.download_options") %></h4>
+        
+        <div class="grid grid-cols-2 gap-2">
+          <%= link_to "PNG (150px)", download_qr_code_path(@qr_code, format: 'png', size: 150), 
+              class: "btn btn-secondary btn-sm", target: "_blank" %>
+          <%= link_to "PNG (300px)", download_qr_code_path(@qr_code, format: 'png', size: 300), 
+              class: "btn btn-secondary btn-sm", target: "_blank" %>
+          <%= link_to "PNG (600px)", download_qr_code_path(@qr_code, format: 'png', size: 600), 
+              class: "btn btn-secondary btn-sm", target: "_blank" %>
+          <%= link_to "SVG", download_qr_code_path(@qr_code, format: 'svg', size: 300), 
+              class: "btn btn-secondary btn-sm", target: "_blank" %>
+        </div>
+
+        <%= button_to t("qr_codes.show.regenerate"), regenerate_qr_code_path(@qr_code), 
+            method: :post,
+            class: "btn btn-primary w-full mt-4",
+            data: { turbo_confirm: t("qr_codes.show.regenerate_confirm") } %>
+      </div>
+    </div>
+
+    <!-- Details and Analytics -->
+    <div class="space-y-6">
+      <!-- QR Code Details -->
+      <div class="card">
+        <h3 class="mb-4"><%= t("qr_codes.show.details") %></h3>
+        
+        <dl class="space-y-3">
+          <div class="form-group">
+            <label class="font-medium text-gray-600"><%= t("qr_codes.show.destination_url") %></label>
+            <div class="flex gap-2">
+              <input type="text" 
+                     value="<%= @qr_code.target_url %>" 
+                     class="form-control" 
+                     readonly>
+              <button class="btn btn-secondary" 
+                      data-controller="clipboard" 
+                      data-clipboard-text="<%= @qr_code.target_url %>"
+                      data-clipboard-success-message-value="<%= t('common.copied', default: 'Copiado!') %>"
+                      data-clipboard-error-message-value="<%= t('common.copy_error', default: 'Error al copiar') %>">
+                <%= t("qr_codes.show.copy") %>
+              </button>
+            </div>
+          </div>
+          
+          <div>
+            <dt class="font-medium text-gray-600"><%= t("qr_codes.show.linked_content") %></dt>
+            <dd class="mt-1">
+              <strong><%= @qr_code.linkable_title %></strong>
+              <br>
+              <span class="text-sm text-gray-500">
+                <%= truncate(@qr_code.linkable.target_value, length: 60) if @qr_code.linkable.respond_to?(:target_value) %>
+              </span>
+            </dd>
+          </div>
+          
+          <div>
+            <dt class="font-medium text-gray-600"><%= t("qr_codes.show.created") %></dt>
+            <dd class="mt-1">
+              <%= time_ago_in_words(@qr_code.created_at) %> <%= t("common.ago") %>
+              <% if @qr_code.created_by %>
+                by <%= @qr_code.created_by.name %>
+              <% end %>
+            </dd>
+          </div>
+        </dl>
+      </div>
+
+      <!-- Playlist Status -->
+      <% if @qr_code.has_playlist? %>
+        <div class="card">
+          <h3 class="mb-4">Playlist Status</h3>
+          
+          <div class="space-y-3">
+            <div>
+              <label class="font-medium text-gray-600">Current Item</label>
+              <% current_item = @qr_code.playlist.current_item %>
+              <% if current_item %>
+                <div class="flex items-center space-x-2 mt-1">
+                  <span class="pill pill-sm <%= schema_type_color(current_item.schema_type) %>">
+                    <%= current_item.schema_type.upcase %>
+                  </span>
+                  <span><%= current_item.title %></span>
+                </div>
+                <div class="text-sm text-gray-500">
+                  <%= current_item.target_description %>
+                </div>
+              <% else %>
+                <div class="text-gray-500">No active item</div>
+              <% end %>
+            </div>
+            
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-600">Position:</span>
+              <span><%= @qr_code.playlist.current_position + 1 %> of <%= @qr_code.playlist.playlist_items.count %></span>
+            </div>
+            
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-600">Type:</span>
+              <span class="capitalize"><%= @qr_code.playlist.playlist_type %></span>
+            </div>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Analytics -->
+      <div class="card">
+        <h3 class="mb-4"><%= t("qr_codes.show.analytics") %></h3>
+        
+        <div class="grid grid-cols-2 gap-4">
+          <div class="text-center">
+            <div class="text-2xl font-bold text-blue-600">
+              <%= number_with_delimiter(@qr_code.download_count) %>
+            </div>
+            <div class="text-sm text-gray-600"><%= t("qr_codes.show.downloads") %></div>
+          </div>
+          
+          <div class="text-center">
+            <div class="text-2xl font-bold text-green-600">
+              <%= number_with_delimiter(@qr_code.scan_count) %>
+            </div>
+            <div class="text-sm text-gray-600"><%= t("qr_codes.show.scans") %></div>
+          </div>
+        </div>
+        
+        <div class="mt-4 pt-4 border-t">
+          <p class="text-sm text-gray-600">
+            <%= t("qr_codes.show.analytics_note") %>
+          </p>
+        </div>
+      </div>
+
+      <!-- Design Settings -->
+      <div class="card">
+        <h3 class="mb-4"><%= t("qr_codes.show.design_settings") %></h3>
+        
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between">
+            <span><%= t("qr_codes.form.foreground_color") %>:</span>
+            <div class="flex items-center space-x-2">
+              <div class="w-4 h-4 rounded border" 
+                   style="background-color: <%= @design_settings['foreground_color'] %>"></div>
+              <code><%= @design_settings['foreground_color'] %></code>
+            </div>
+          </div>
+          
+          <div class="flex justify-between">
+            <span><%= t("qr_codes.form.background_color") %>:</span>
+            <div class="flex items-center space-x-2">
+              <div class="w-4 h-4 rounded border" 
+                   style="background-color: <%= @design_settings['background_color'] %>"></div>
+              <code><%= @design_settings['background_color'] %></code>
+            </div>
+          </div>
+          
+          <div class="flex justify-between">
+            <span><%= t("qr_codes.form.dot_style") %>:</span>
+            <span class="capitalize"><%= @design_settings['dot_style'] %></span>
+          </div>
+          
+          <div class="flex justify-between">
+            <span><%= t("qr_codes.form.corner_style") %>:</span>
+            <span class="capitalize"><%= @design_settings['corner_style'] %></span>
+          </div>
+          
+          <div class="flex justify-between">
+            <span><%= t("qr_codes.form.margin") %>:</span>
+            <span><%= @design_settings['margin'] %>px</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

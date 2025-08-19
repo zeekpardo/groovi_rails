@@ -1,0 +1,99 @@
+<div class="<%= component.container_class %>" <%= component.data_attributes.map { |k, v| "data-#{k.to_s.dasherize}=\"#{v}\"" }.join(' ').html_safe %>>
+  
+  <!-- Default content (button/trigger) -->
+  <%= component.content if component.content.present? %>
+  
+  <!-- QR Code Container -->
+  <div data-qr-code-component-target="container" class="qr-code-display">
+    
+    <!-- Loading State -->
+    <div data-qr-code-component-target="loading" class="qr-loading-state">
+      <% if component.loading_state? %>
+        <%= component.loading_state %>
+      <% else %>
+        <div class="flex items-center justify-center p-8">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+          <span class="ml-2 text-sm text-gray-600">Generating QR code...</span>
+        </div>
+      <% end %>
+    </div>
+    
+    <!-- QR Code Display Area -->
+    <div data-qr-code-component-target="display" class="qr-display-area" style="display: none;">
+      <!-- QR code will be injected here -->
+    </div>
+    
+    <!-- Error State -->
+    <div data-qr-code-component-target="error" class="qr-error-state" style="display: none;">
+      <% if component.error_state? %>
+        <%= component.error_state %>
+      <% else %>
+        <div class="flex flex-col items-center justify-center p-8 text-center">
+          <svg class="h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+          </svg>
+          <p class="text-sm text-gray-600">Failed to generate QR code</p>
+          <% if component.show_fallback? %>
+            <button data-action="click->qr-code-component#useFallback" class="mt-2 text-xs text-blue-600 hover:text-blue-800">
+              Try fallback generator
+            </button>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+    
+  </div>
+</div>
+
+<style>
+.qr-code-component {
+  position: relative;
+  width: 100%;
+}
+
+.qr-code-display {
+  position: relative;
+  min-height: 200px;
+  background: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+}
+
+.qr-display-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.qr-display-area svg {
+  max-width: 100%;
+  max-height: 300px;
+  width: auto;
+  height: auto;
+}
+
+.qr-display-area img {
+  max-width: 100%;
+  max-height: 300px;
+  width: auto;
+  height: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.25rem;
+}
+
+.qr-loading-state,
+.qr-error-state {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border-radius: 0.5rem;
+}
+</style>

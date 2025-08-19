@@ -1,0 +1,113 @@
+<% content_for :title, "Edit #{@playlist.name}" %>
+
+<div class="container mx-auto max-w-2xl p-4">
+  <div class="mb-6">
+    <%= link_to qr_code_playlist_path(@qr_code), class: "btn btn-secondary btn-sm" do %>
+      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+      Back to Playlist
+    <% end %>
+    
+    <h1 class="text-2xl font-bold mt-4">Edit Playlist</h1>
+    <p class="text-gray-600">Modify settings for <strong><%= @qr_code.name %></strong></p>
+  </div>
+
+  <div class="card">
+    <%= form_with model: @playlist, url: qr_code_playlist_path(@qr_code), local: true, class: "space-y-6" do |form| %>
+      <% if @playlist.errors.any? %>
+        <div class="alert alert-danger">
+          <h4><%= pluralize(@playlist.errors.count, "error") %> prohibited this playlist from being saved:</h4>
+          <ul class="list-disc list-inside mt-2">
+            <% @playlist.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <!-- Basic Information -->
+      <div class="space-y-4">
+        <h3 class="font-semibold">Basic Information</h3>
+        
+        <div class="form-group">
+          <%= form.label :name, class: "form-label" %>
+          <%= form.text_field :name, class: "form-control", placeholder: "e.g., Church Conference" %>
+          <p class="form-hint">A descriptive name for your playlist</p>
+        </div>
+
+        <div class="form-group">
+          <%= form.label :description, class: "form-label" %>
+          <%= form.text_area :description, class: "form-control", rows: 3, placeholder: "Optional description..." %>
+          <p class="form-hint">Optional description of the playlist's purpose</p>
+        </div>
+
+        <div class="form-group">
+          <%= form.label :playlist_type, "Playlist Type", class: "form-label" %>
+          <%= form.select :playlist_type, 
+              options_for_select([
+                ["Sequential - Items play in order", "sequential"],
+                ["Random - Items play randomly", "random"]
+              ], @playlist.playlist_type), 
+              {}, 
+              { class: "form-control" } %>
+          <p class="form-hint">How items should be played when QR code is scanned</p>
+        </div>
+      </div>
+
+      <!-- Settings -->
+      <div class="space-y-4">
+        <h3 class="font-semibold">Playlist Settings</h3>
+        
+        <div class="form-group">
+          <label class="flex items-center space-x-2">
+            <%= check_box_tag "playlist[settings][auto_advance]", "1", @playlist.settings["auto_advance"], class: "form-checkbox" %>
+            <span class="form-label">Auto-advance to next item</span>
+          </label>
+          <p class="form-hint ml-6">Automatically move to the next item after each scan</p>
+        </div>
+
+        <div class="form-group">
+          <label class="flex items-center space-x-2">
+            <%= check_box_tag "playlist[settings][loop_playlist]", "1", @playlist.settings["loop_playlist"], class: "form-checkbox" %>
+            <span class="form-label">Loop playlist</span>
+          </label>
+          <p class="form-hint ml-6">Start over from the beginning when reaching the end</p>
+        </div>
+      </div>
+
+      <!-- Current Status -->
+      <div class="space-y-4">
+        <h3 class="font-semibold">Current Status</h3>
+        
+        <div class="bg-gray-50 p-4 rounded-lg">
+          <div class="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <strong>Items:</strong> <%= @playlist.playlist_items.count %>
+            </div>
+            <div>
+              <strong>Position:</strong> <%= @playlist.current_position + 1 %> of <%= @playlist.playlist_items.count %>
+            </div>
+            <div>
+              <strong>Current Item:</strong> 
+              <% if @playlist.current_item %>
+                <%= @playlist.current_item.title %>
+              <% else %>
+                None
+              <% end %>
+            </div>
+            <div>
+              <strong>Type:</strong> <%= @playlist.playlist_type.capitalize %>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex justify-end space-x-4">
+        <%= link_to "Cancel", qr_code_playlist_path(@qr_code), class: "btn btn-secondary" %>
+        <%= form.submit "Update Playlist", class: "btn btn-primary" %>
+      </div>
+    <% end %>
+  </div>
+</div>

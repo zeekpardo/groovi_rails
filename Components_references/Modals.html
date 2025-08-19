@@ -1,0 +1,140 @@
+##Modals
+# Modals are implemented using the Stimulus modal_controller or overriding the Turbo confirm method.
+#Confirmation Modal
+<form>
+    <button
+      class="btn btn-secondary"
+      data-turbo-confirm="Are you sure?"
+      data-turbo-confirm-description="This action is permanent and cannot be undone."
+      >Confirm</button>
+  </form>
+
+  #Small Modal
+<!-- BEGIN app/views/components/_modal.html.erb --><div data-controller="modal">
+  
+  <button class="btn btn-secondary" data-action="click->modal#open:prevent">Open Small Modal</button>
+
+
+
+
+  <dialog class="modal modal-sm" data-modal-target="dialog" data-action="click-&gt;modal#backdropClose">
+    <div class="modal-card">
+        <button type="button" data-action="modal#close:prevent">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+            <line x1="18" x2="6" y1="6" y2="18"></line>
+            <line x1="6" x2="18" y1="6" y2="18"></line>
+          </svg>
+          <span class="sr-only">Close</span>
+        </button>
+
+        <div>
+              <h2 class="modal-title">Are you sure?</h2>
+    <p class="modal-body">Are you sure you want to do that. Seriously?</p>
+
+        </div>
+
+        <div>
+              <button class="btn btn-secondary" data-action="click->modal#close:prevent">Cancel</button>
+    <button class="btn btn-primary" data-action="click->modal#close:prevent">Continue</button>
+
+        </div>
+</div></dialog></div>
+<!-- END app/views/components/_modal.html.erb -->
+
+#Medium Modal
+
+<!-- BEGIN app/views/components/_modal.html.erb --><div data-controller="modal">
+  
+    <button class="btn btn-secondary" data-action="click->modal#open:prevent">Open Medium Modal</button>
+
+
+
+
+    <dialog class="modal modal-md" data-modal-target="dialog" data-action="click-&gt;modal#backdropClose">
+      <div class="modal-card">
+          <button type="button" data-action="modal#close:prevent">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+              <line x1="18" x2="6" y1="6" y2="18"></line>
+              <line x1="6" x2="18" y1="6" y2="18"></line>
+            </svg>
+            <span class="sr-only">Close</span>
+          </button>
+  
+          <div>
+                <h2 class="modal-title">Are you sure?</h2>
+      <p class="modal-body">Are you sure you want to do that. Seriously?</p>
+  
+          </div>
+  
+          <div>
+                <button class="btn btn-secondary" data-action="click->modal#close:prevent">Cancel</button>
+      <button class="btn btn-primary" data-action="click->modal#close:prevent">Continue</button>
+  
+          </div>
+  </div></dialog></div>
+  <!-- END app/views/components/_modal.html.erb -->
+
+  #Large Modal
+  
+  <!-- BEGIN app/views/components/_modal.html.erb --><div data-controller="modal">
+  
+    <button class="btn btn-secondary" data-action="click->modal#open:prevent">Open Large Modal</button>
+
+
+
+
+    <dialog class="modal modal-lg" data-modal-target="dialog" data-action="click-&gt;modal#backdropClose">
+      <div class="modal-card">
+          <button type="button" data-action="modal#close:prevent">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+              <line x1="18" x2="6" y1="6" y2="18"></line>
+              <line x1="6" x2="18" y1="6" y2="18"></line>
+            </svg>
+            <span class="sr-only">Close</span>
+          </button>
+  
+          <div>
+                <h2 class="modal-title">Are you sure?</h2>
+      <p class="modal-body">Are you sure you want to do that. Seriously?</p>
+  
+          </div>
+  
+          <div>
+                <button class="btn btn-secondary" data-action="click->modal#close:prevent">Cancel</button>
+      <button class="btn btn-primary" data-action="click->modal#close:prevent">Continue</button>
+  
+          </div>
+  </div></dialog></div>
+  <!-- END app/views/components/_modal.html.erb -->
+   #Fullscreen Modal
+
+   <!-- BEGIN app/views/components/_modal.html.erb --><div data-controller="modal">
+  
+  <button class="btn btn-secondary" data-action="click->modal#open:prevent">Open Fullscreen Modal</button>
+
+  
+
+
+  <dialog class="modal modal-full" data-modal-target="dialog" data-action="click-&gt;modal#backdropClose">
+    <div class="modal-card full">
+        <button type="button" data-action="modal#close:prevent">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+            <line x1="18" x2="6" y1="6" y2="18"></line>
+            <line x1="6" x2="18" y1="6" y2="18"></line>
+          </svg>
+          <span class="sr-only">Close</span>
+        </button>
+
+        <div>
+                <h2 class="modal-title">Are you sure?</h2>
+      <p class="modal-body">Are you sure you want to do that. Seriously?</p>
+
+        </div>
+
+        <div>
+              <button class="btn btn-secondary" data-action="click->modal#close:prevent">Cancel</button>
+    <button class="btn btn-primary" data-action="click->modal#close:prevent">Continue</button>
+
+        </div>
+</div></dialog></div>
+<!-- END app/views/components/_modal.html.erb -->

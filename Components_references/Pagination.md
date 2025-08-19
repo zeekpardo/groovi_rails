@@ -1,0 +1,4 @@
+#Pagination
+<nav class="pagy nav" aria-label="Pages"><a role="link" aria-disabled="true" aria-label="Previous">&lt;</a><a role="link" aria-disabled="true" aria-current="page" class="current">1</a><a href="/en/jumpstart/docs/pagination?locale=en&page=2">2</a><a href="/en/jumpstart/docs/pagination?locale=en&page=3">3</a><a href="/en/jumpstart/docs/pagination?locale=en&page=4">4</a><a href="/en/jumpstart/docs/pagination?locale=en&page=5">5</a><a role="link" aria-disabled="true" class="gap">&hellip;</a><a href="/en/jumpstart/docs/pagination?locale=en&page=50">50</a><a href="/en/jumpstart/docs/pagination?locale=en&page=2" aria-label="Next">&gt;</a></nav>
+
+Styling is automatically defined to match with the Pagy gem's HTML and classes. https://github.com/ddnexus/pagy

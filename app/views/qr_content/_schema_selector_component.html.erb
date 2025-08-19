@@ -1,0 +1,42 @@
+<%
+  field_name_prefix = local_assigns.fetch(:field_name_prefix, "shortened_link")
+  current_schema = local_assigns.fetch(:current_schema, "url")
+  controller = local_assigns.fetch(:controller, "schema-switcher")
+  action = local_assigns.fetch(:action, "switchSchema")
+  schema_types = local_assigns.fetch(:schema_types, [
+    { value: "url", label: t("qr_codes.schema_types.website"), icon: "globe" },
+    { value: "phone", label: t("qr_codes.schema_types.phone"), icon: "phone" },
+    { value: "sms", label: t("qr_codes.schema_types.sms"), icon: "message-square" },
+    { value: "email", label: t("qr_codes.schema_types.email"), icon: "mail" },
+    { value: "whatsapp", label: t("qr_codes.schema_types.whatsapp"), icon: "message-circle" }
+  ])
+  
+  if schema_types.present? && schema_types.first.is_a?(Hash) && !schema_types.first.key?(:label)
+    schema_types = schema_types.map do |type|
+      type.merge(label: t("qr_codes.schema_types.#{type[:label].downcase}"))
+    end
+  end
+%>
+
+<div class="form-group">
+  <%= label_tag "#{field_name_prefix}_schema_type", t("qr_codes.form.schema_type") %>
+  <div class="flex flex-wrap gap-2" role="group">
+    <% schema_types.each do |type| %>
+      <% is_active = current_schema == type[:value] %>
+      <button type="button" 
+              class="btn <%= is_active ? 'btn-primary' : 'btn-secondary' %>"
+              data-schema-type="<%= type[:value] %>"
+              data-action="click-><%= controller %>#<%= action %>">
+        <div class="flex items-center gap-2">
+          <%= content_tag :i, "", data: { feather: type[:icon] }, class: "w-4 h-4" %>
+          <span><%= type[:label] %></span>
+        </div>
+      </button>
+      <%= radio_button_tag "#{field_name_prefix}[schema_type]", 
+          type[:value], 
+          is_active,
+          class: "hidden",
+          id: "schema_type_#{type[:value]}" %>
+    <% end %>
+  </div>
+</div>

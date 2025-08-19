@@ -1,0 +1,14 @@
+#Tooltips
+Overview
+Tooltips are powered by Floating UI. We've wrapped them in a Stimulus controller so you can easily add them anywhere in your application. See also Clipboard which uses tooltips.
+
+Add a data-controller="tooltip" data-tooltip-content="My tooltip" to the element you want to add the tooltip to. You can set options using data attributes without writing any JS.
+
+Hover over me
+Toggle Source
+<button class="btn btn-secondary" data-controller="tooltip" data-tooltip-content-value="I'm a tooltip!">Hover over me</button>
+You can also specify the placement of the tooltip with data-tooltip-placement-value="right".
+
+Hover over me
+Toggle Source
+<button class="btn btn-secondary" data-controller="tooltip" data-tooltip-placement-value="right" data-tooltip-content-value="I'm a tooltip!">Hover over me</button>

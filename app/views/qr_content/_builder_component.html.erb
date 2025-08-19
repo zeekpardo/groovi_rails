@@ -1,0 +1,74 @@
+<%
+  field_name_prefix = local_assigns.fetch(:field_name_prefix, "shortened_link")
+  linkable = local_assigns.fetch(:linkable, nil)
+  stimulus_controller = local_assigns.fetch(:stimulus_controller, "schema-switcher")
+  current_schema = local_assigns.fetch(:current_schema, "url")
+  schema_types = local_assigns.fetch(:schema_types, nil)
+  compact = local_assigns.fetch(:compact, false)
+%>
+
+<div data-controller="<%= stimulus_controller %>" class="space-y-4">
+  <!-- Schema Type Selection -->
+  <%= render "qr_content/schema_selector_component",
+      field_name_prefix: field_name_prefix,
+      current_schema: current_schema,
+      controller: stimulus_controller,
+      action: "switchSchema",
+      schema_types: schema_types %>
+
+  <!-- URL Fields -->
+  <div data-schema-switcher-target="urlFields" 
+       class="<%= compact ? '' : 'space-y-3' %>" 
+       style="display: <%= current_schema == 'url' ? 'block' : 'none' %>">
+    <%= render "qr_content/url_component", 
+        field_name_prefix: field_name_prefix,
+        value: (current_schema == 'url' ? linkable&.target_value : ''),
+        placeholder: "https://example.com",
+        required: current_schema == 'url' %>
+  </div>
+
+  <!-- Phone Fields -->
+  <div data-schema-switcher-target="phoneFields" 
+       class="<%= compact ? '' : 'space-y-3' %>" 
+       style="display: <%= current_schema == 'phone' ? 'block' : 'none' %>">
+    <%= render "qr_content/phone_component", 
+        field_name_prefix: field_name_prefix,
+        value: (current_schema == 'phone' ? linkable&.target_value : ''),
+        placeholder: "+1234567890",
+        required: current_schema == 'phone' %>
+  </div>
+
+  <!-- SMS Fields -->
+  <div data-schema-switcher-target="smsFields" 
+       class="<%= compact ? '' : 'space-y-3' %>" 
+       style="display: <%= current_schema == 'sms' ? 'block' : 'none' %>">
+    <%= render "qr_content/sms_component", 
+        field_name_prefix: field_name_prefix,
+        phone_value: (current_schema == 'sms' ? linkable&.target_value : ''),
+        message_value: (current_schema == 'sms' ? linkable&.message : ''),
+        required: current_schema == 'sms' %>
+  </div>
+
+  <!-- Email Fields -->
+  <div data-schema-switcher-target="emailFields" 
+       class="<%= compact ? '' : 'space-y-3' %>" 
+       style="display: <%= current_schema == 'email' ? 'block' : 'none' %>">
+    <%= render "qr_content/email_component", 
+        field_name_prefix: field_name_prefix,
+        email_value: (current_schema == 'email' ? linkable&.target_value : ''),
+        subject_value: (current_schema == 'email' ? linkable&.subject : ''),
+        body_value: (current_schema == 'email' ? linkable&.message : ''),
+        required: current_schema == 'email' %>
+  </div>
+
+  <!-- WhatsApp Fields -->
+  <div data-schema-switcher-target="whatsappFields" 
+       class="<%= compact ? '' : 'space-y-3' %>" 
+       style="display: <%= current_schema == 'whatsapp' ? 'block' : 'none' %>">
+    <%= render "qr_content/whatsapp_component", 
+        field_name_prefix: field_name_prefix,
+        phone_value: (current_schema == 'whatsapp' ? linkable&.target_value : ''),
+        message_value: (current_schema == 'whatsapp' ? linkable&.message : ''),
+        required: current_schema == 'whatsapp' %>
+  </div>
+</div>

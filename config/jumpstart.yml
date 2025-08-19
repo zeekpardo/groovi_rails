@@ -1,0 +1,21 @@
+---
+application_name: Groovi AI
+business_name: Groovi AI, LLC
+business_address: 
+domain: groovi.pro
+support_email: support@groovi.pro
+default_from_email: Groovi <no-reply@groovi.pro>
+background_job_processor: sidekiq
+email_provider: ses
+account_types: team
+apns: false
+fcm: false
+integrations:
+omniauth_providers:
+payment_processors:
+multitenancy:
+- subdomain
+- path
+gems:
+- acts_as_tenant
+- whenever

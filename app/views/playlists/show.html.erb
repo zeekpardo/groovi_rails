@@ -1,0 +1,198 @@
+<% content_for :title, @qr_code.name %>
+
+<div class="container mx-auto max-w-4xl p-4" 
+     data-controller="playlist-manager modal"
+     data-playlist-manager-qr-code-id-value="<%= @qr_code.id %>"
+     data-playlist-manager-playlist-id-value="<%= @playlist.id %>">
+  
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-6">
+    <%= link_to qr_codes_path, class: "btn btn-link" do %>
+      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+      <%= t('common.back_to_dashboard') %>
+    <% end %>
+    
+    <%= link_to edit_qr_code_path(@qr_code), class: "btn btn-outline btn-secondary" do %>
+      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+      </svg>
+      Edit QR Code
+    <% end %>
+  </div>
+
+  <!-- QR Code Info -->
+  <div class="mb-8">
+    <h1 class="text-4xl font-bold text-gray-900 mb-2"><%= @qr_code.name %></h1>
+    <p class="text-gray-600 text-lg">Manage playlist items for this QR code</p>
+  </div>
+
+  <!-- Current URL Section -->
+  <div class="card mb-8">
+    <div class="flex items-center justify-between">
+      <div class="flex-1">
+        <h3 class="text-sm font-medium text-gray-500 mb-1">Current URL</h3>
+        <% current_item = @playlist.current_item %>
+        <% if current_item %>
+          <%= link_to current_item.build_redirect_url, 
+              class: "text-blue-600 hover:underline text-lg font-medium", 
+              target: "_blank" do %>
+            <%= current_item.target_description %>
+          <% end %>
+        <% else %>
+          <span class="text-gray-500 text-lg"><%= t('playlists.no_active_items') %></span>
+        <% end %>
+      </div>
+      
+      <div class="flex items-center space-x-3">
+        <button class="btn btn-outline btn-secondary" 
+                data-action="click->playlist-manager#resetPlaylist"
+                data-playlist-manager-target="resetBtn">
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+          Previous
+        </button>
+        
+        <button class="btn btn-primary" 
+                data-action="click->playlist-manager#advancePlaylist"
+                data-playlist-manager-target="advanceBtn">
+          Start Over
+          <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Playlist Items Header -->
+  <div class="flex items-center justify-between mb-6">
+    <div class="flex items-center space-x-4">
+      <h2 class="text-2xl font-semibold text-gray-900">Playlist Items (<%= @playlist_items.count %> items)</h2>
+      <button class="btn btn-outline btn-secondary btn-sm">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h8a2 2 0 002-2V8m-9 4h4" />
+        </svg>
+        Archived
+      </button>
+    </div>
+    
+    <button class="btn btn-primary" data-action="click->modal#open:prevent">
+      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+      </svg>
+      Add Item
+    </button>
+  </div>
+
+  <!-- Playlist Items -->
+  <div class="space-y-3" data-playlist-manager-target="itemsList">
+    <% @playlist_items.each_with_index do |item, index| %>
+      <% is_active = @playlist.current_position == index %>
+      <div class="card p-4 <%= 'border-2 border-blue-300 bg-blue-50/50' if is_active %>" 
+           draggable="true" 
+           data-item-id="<%= item.id %>"
+           data-playlist-manager-target="playlistItem">
+        <div class="flex items-center space-x-4">
+          <!-- Drag Handle -->
+          <div class="flex-shrink-0 cursor-move text-gray-400 hover:text-gray-600">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M9 3h2v2H9V3zm4 0h2v2h-2V3zM9 7h2v2H9V7zm4 0h2v2h-2V7zM9 11h2v2H9v-2zm4 0h2v2h-2v-2zM9 15h2v2H9v-2zm4 0h2v2h-2v-2zM9 19h2v2H9v-2zm4 0h2v2h-2v-2z"/>
+            </svg>
+          </div>
+          
+          <!-- Schema Type Badge -->
+          <div class="flex-shrink-0">
+            <div class="px-3 py-1 bg-gray-100 rounded-full text-xs font-medium text-gray-700 uppercase">
+              <%= item.schema_type %>
+            </div>
+          </div>
+          
+          <!-- Content -->
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center space-x-2">
+              <h4 class="font-semibold text-gray-900 truncate text-lg">
+                <%= item.title %>
+              </h4>
+              <%= link_to edit_qr_code_playlist_playlist_item_path(@qr_code, @playlist, item), 
+                  class: "text-gray-400 hover:text-gray-600" do %>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+              <% end %>
+            </div>
+            <p class="text-gray-600 truncate">
+              <%= item.target_description %>
+            </p>
+            <% if is_active %>
+              <div class="mt-2 flex items-center space-x-2">
+                <span class="inline-flex items-center px-2 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                  Currently Active
+                </span>
+                <div class="flex items-center text-sm text-blue-600">
+                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Next: Today 9:40 PM
+                </div>
+              </div>
+            <% end %>
+          </div>
+          
+          <!-- Actions -->
+          <div class="flex items-center space-x-3">
+            <button class="btn btn-primary btn-icon"
+                    data-action="click->playlist-manager#playItem"
+                    data-item-id="<%= item.id %>"
+                    title="Play this item">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+            </button>
+            
+            <button class="btn btn-outline btn-secondary btn-icon"
+                    title="View item info">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </button>
+            
+            <%= button_to qr_code_playlist_playlist_item_path(@qr_code, @playlist, item), 
+                method: :delete, 
+                data: { turbo_confirm: t('common.are_you_sure') },
+                class: "btn btn-outline btn-secondary btn-icon text-red-600 hover:text-red-700 hover:border-red-300",
+                title: "Delete item" do %>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <% if @playlist_items.empty? %>
+    <!-- Empty state -->
+    <div class="card text-center py-16">
+      <div class="text-6xl mb-6">🎵</div>
+      <h3 class="text-xl font-semibold text-gray-900 mb-3">No playlist items yet</h3>
+      <p class="text-gray-600 mb-8 text-lg">Add your first item to get started with your playlist</p>
+      <button class="btn btn-primary btn-lg" data-action="click->modal#open:prevent">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+        </svg>
+        Add First Item
+      </button>
+    </div>
+  <% end %>
+
+
+
+  <%= render "add_item_modal", qr_code: @qr_code, playlist: @playlist %>
+</div>
+
+
+

@@ -1,0 +1,278 @@
+<%= form_with(model: @qr_code, local: true, 
+              data: { 
+                controller: "form-handler qr-form"
+              }) do |form| %>
+  <% if @qr_code.errors.any? %>
+    <div class="alert alert-danger mb-4">
+      <h4><%= pluralize(@qr_code.errors.count, "error") %> prohibited this QR code from being saved:</h4>
+      <ul class="mt-2">
+        <% @qr_code.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <% if @shortened_link_errors.present? %>
+    <div class="alert alert-danger mb-4">
+      <h4>Shortened link errors:</h4>
+      <ul class="mt-2">
+        <% @shortened_link_errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="grid lg:grid-cols-2 gap-6" data-qr-designer-target="form">
+    <!-- Configuration Panel -->
+    <div class="space-y-6">
+      <!-- Basic Information -->
+      <div class="card">
+        <h3 class="text-base font-semibold"><%= t("qr_codes.form.basic_info") %></h3>
+        
+        <div class="form-group">
+          <%= form.label :name, t("qr_codes.form.name") %>
+          <%= form.text_field :name, class: "form-control", required: true,
+              placeholder: t("qr_codes.form.name_placeholder") %>
+        </div>
+
+        <div class="form-group">
+          <%= label_tag "shortened_link_custom_slug", "Short ID (Optional)" %>
+          <%= text_field_tag "shortened_link[custom_slug]", 
+              @qr_code.linkable&.custom_slug,
+              class: "form-control",
+              placeholder: "Custom short ID" %>
+          <p class="form-hint">
+            Leave empty for auto-generated ID. Dynamic QR codes get a permanent URL that you can change the destination of anytime.
+          </p>
+        </div>
+      </div>
+
+      <!-- Content Configuration -->
+      <div class="card">
+        <h3 class="text-base font-semibold mb-4">Content</h3>
+        
+        <!-- Content Type Selection -->
+        <div class="form-group">
+          <%= label_tag "shortened_link_schema_type", "Content Type" %>
+          <%= select_tag "shortened_link[schema_type]", 
+              options_for_select([
+                ["Website", "url"],
+                ["Phone", "phone"],
+                ["SMS", "sms"],
+                ["Email", "email"],
+                ["WhatsApp", "whatsapp"]
+              ], @qr_code.linkable&.schema_type || "url"),
+              class: "select",
+              data: { action: "change->qr-form#switchContentType", "qr-form-target": "schemaSelect" } %>
+        </div>
+
+        <!-- Website URL Fields -->
+        <div data-qr-form-target="urlFields" class="form-group" style="display: <%= (@qr_code.linkable&.schema_type || 'url') == 'url' ? 'block' : 'none' %>">
+          <%= label_tag "shortened_link_target_value", "Website URL" %>
+          <%= url_field_tag "shortened_link[target_value]", 
+              (@qr_code.linkable&.schema_type == 'url' ? @qr_code.linkable&.target_value : ''),
+              class: "form-control",
+              placeholder: "https://example.com",
+              data: { "qr-form-target": "urlInput" } %>
+        </div>
+
+        <!-- Phone Fields -->
+        <div data-qr-form-target="phoneFields" class="form-group" style="display: <%= @qr_code.linkable&.schema_type == 'phone' ? 'block' : 'none' %>">
+          <%= label_tag "shortened_link_target_value", "Phone Number" %>
+          <%= telephone_field_tag "shortened_link[target_value]", 
+              (@qr_code.linkable&.schema_type == 'phone' ? @qr_code.linkable&.target_value : ''),
+              class: "form-control",
+              placeholder: "+1234567890",
+              data: { "qr-form-target": "phoneInput" } %>
+          <p class="form-hint">Include country code (e.g., +1234567890)</p>
+        </div>
+
+        <!-- SMS Fields -->
+        <div data-qr-form-target="smsFields" style="display: <%= @qr_code.linkable&.schema_type == 'sms' ? 'block' : 'none' %>">
+          <div class="form-group">
+            <%= label_tag "shortened_link_target_value", "SMS Number" %>
+            <%= telephone_field_tag "shortened_link[target_value]", 
+                (@qr_code.linkable&.schema_type == 'sms' ? @qr_code.linkable&.target_value : ''),
+                class: "form-control",
+                placeholder: "+1234567890",
+                data: { "qr-form-target": "smsInput" } %>
+            <p class="form-hint">Include country code (e.g., +1234567890)</p>
+          </div>
+          <div class="form-group">
+            <%= label_tag "shortened_link_message", "Message (Optional)" %>
+            <%= text_area_tag "shortened_link[metadata][message]", 
+                (@qr_code.linkable&.schema_type == 'sms' ? @qr_code.linkable&.message : ''),
+                class: "form-control",
+                rows: 3,
+                placeholder: "Pre-filled SMS message" %>
+          </div>
+        </div>
+
+        <!-- Email Fields -->
+        <div data-qr-form-target="emailFields" style="display: <%= @qr_code.linkable&.schema_type == 'email' ? 'block' : 'none' %>">
+          <div class="form-group">
+            <%= label_tag "shortened_link_target_value", "Email Address" %>
+            <%= email_field_tag "shortened_link[target_value]", 
+                (@qr_code.linkable&.schema_type == 'email' ? @qr_code.linkable&.target_value : ''),
+                class: "form-control",
+                placeholder: "contact@example.com",
+                data: { "qr-form-target": "emailInput" } %>
+          </div>
+          <div class="form-group">
+            <%= label_tag "shortened_link_subject", "Subject (Optional)" %>
+            <%= text_field_tag "shortened_link[metadata][subject]", 
+                (@qr_code.linkable&.schema_type == 'email' ? @qr_code.linkable&.subject : ''),
+                class: "form-control",
+                placeholder: "Email subject" %>
+          </div>
+          <div class="form-group">
+            <%= label_tag "shortened_link_message", "Body (Optional)" %>
+            <%= text_area_tag "shortened_link[metadata][message]", 
+                (@qr_code.linkable&.schema_type == 'email' ? @qr_code.linkable&.message : ''),
+                class: "form-control",
+                rows: 3,
+                placeholder: "Email body" %>
+          </div>
+        </div>
+
+        <!-- WhatsApp Fields -->
+        <div data-qr-form-target="whatsappFields" style="display: <%= @qr_code.linkable&.schema_type == 'whatsapp' ? 'block' : 'none' %>">
+          <div class="form-group">
+            <%= label_tag "shortened_link_target_value", "WhatsApp Number" %>
+            <%= telephone_field_tag "shortened_link[target_value]", 
+                (@qr_code.linkable&.schema_type == 'whatsapp' ? @qr_code.linkable&.target_value : ''),
+                class: "form-control",
+                placeholder: "1234567890",
+                data: { "qr-form-target": "whatsappInput" } %>
+            <p class="form-hint">Include country code without + (e.g., 1234567890)</p>
+          </div>
+          <div class="form-group">
+            <%= label_tag "shortened_link_message", "Message (Optional)" %>
+            <%= text_area_tag "shortened_link[metadata][message]", 
+                (@qr_code.linkable&.schema_type == 'whatsapp' ? @qr_code.linkable&.message : ''),
+                class: "form-control",
+                rows: 3,
+                placeholder: "Pre-filled WhatsApp message" %>
+          </div>
+        </div>
+
+        <!-- Hidden fields -->
+        <%= hidden_field_tag "content_source", "new" %>
+        <%= hidden_field_tag "shortened_link[title]", "", 
+            data: { "qr-form-target": "linkTitle" } %>
+      </div>
+
+      <!-- Design Settings -->
+      <div class="card">
+        <h3 class="text-base font-semibold mb-4"><%= t("qr_codes.form.design_settings") %></h3>
+        
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="form-group">
+            <%= label_tag "foreground_color", t("qr_codes.form.foreground_color") %>
+            <%= color_field_tag "qr_code[design_settings][foreground_color]", 
+                @design_settings&.dig(:foreground_color) || "#000000",
+                class: "form-control" %>
+          </div>
+
+          <div class="form-group">
+            <%= label_tag "background_color", t("qr_codes.form.background_color") %>
+            <%= color_field_tag "qr_code[design_settings][background_color]", 
+                @design_settings&.dig(:background_color) || "#FFFFFF",
+                class: "form-control" %>
+          </div>
+
+          <div class="form-group">
+            <%= label_tag "dot_style", t("qr_codes.form.dot_style") %>
+            <%= select_tag "qr_code[design_settings][dot_style]",
+                options_for_select([
+                  ["Square", "square"],
+                  ["Rounded", "rounded"],
+                  ["Dots", "dots"]
+                ], @design_settings&.dig(:dot_style) || "rounded"),
+                class: "select" %>
+          </div>
+
+          <div class="form-group">
+            <%= label_tag "corner_style", t("qr_codes.form.corner_style") %>
+            <%= select_tag "qr_code[design_settings][corner_style]",
+                options_for_select([
+                  ["Square", "square"],
+                  ["Rounded", "rounded"]
+                ], @design_settings&.dig(:corner_style) || "rounded"),
+                class: "select" %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Preview Panel -->
+    <div>
+      <div class="card sticky top-4">
+        <h3 class="text-base font-semibold mb-4"><%= t("qr_codes.form.preview") %></h3>
+        
+        <div class="text-center">
+          <%= render QrCodeComponent.new(
+                data: @qr_code.linkable&.full_url || "#{request.base_url}/abc123",
+                size: 300,
+                foreground_color: @design_settings&.dig(:foreground_color) || "#000000",
+                background_color: @design_settings&.dig(:background_color) || "#FFFFFF",
+                dot_style: @design_settings&.dig(:dot_style) || "rounded",
+                corner_style: @design_settings&.dig(:corner_style) || "rounded",
+                container_class: "qr-preview-component"
+              ) do |component| %>
+            <div data-qr-form-target="qrPreview" class="hidden">
+              <!-- This div serves as the target for QR form updates -->
+            </div>
+          <% end %>
+          
+          <p class="text-sm text-muted mt-4">
+            <%= t("qr_codes.form.preview_note") %>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-6 space-x-2">
+    <%= form.submit class: "btn btn-primary" %>
+    <%= link_to t("cancel"), qr_codes_path, class: "btn btn-secondary" %>
+  </div>
+<% end %>
+
+<style>
+  .btn-group label.btn {
+    margin: 0;
+  }
+  
+  .btn-group label.btn input:checked + div {
+    background-color: var(--color-primary);
+    color: white;
+  }
+  
+  .btn-secondary-outline {
+    background: white;
+    border: 1px solid #e5e7eb;
+    color: #374151;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .btn-secondary-outline:hover {
+    background: #f9fafb;
+    border-color: #d1d5db;
+  }
+  
+  .btn-secondary-outline:has(input:checked) {
+    background: #3b82f6;
+    color: white;
+    border-color: #3b82f6;
+  }
+
+  .qr-preview-component {
+    max-width: 100%;
+  }
+</style>

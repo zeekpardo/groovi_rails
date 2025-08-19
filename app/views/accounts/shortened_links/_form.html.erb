@@ -1,0 +1,178 @@
+<%= form_with(model: [@account, @shortened_link], local: true, 
+              data: { controller: "url-shortener" }) do |form| %>
+  <% if @shortened_link.errors.any? %>
+    <div class="alert alert-danger mb-4">
+      <h4><%= pluralize(@shortened_link.errors.count, "error") %> prohibited this link from being saved:</h4>
+      <ul class="mt-2">
+        <% @shortened_link.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="grid md:grid-cols-2 gap-6">
+    <!-- Basic Information -->
+    <div class="card">
+      <h3><%= t("shortened_links.form.basic_info") %></h3>
+      
+      <div class="form-group">
+        <%= form.label :title, t("shortened_links.form.title") %>
+        <%= form.text_field :title, class: "form-control", required: true,
+            placeholder: t("shortened_links.form.title_placeholder") %>
+      </div>
+
+      <div class="form-group">
+        <%= form.label :description, t("shortened_links.form.description") %>
+        <%= form.text_area :description, class: "form-control", rows: 3,
+            placeholder: t("shortened_links.form.description_placeholder") %>
+      </div>
+
+      <div class="form-group">
+        <%= form.label :custom_slug, t("shortened_links.form.custom_slug") %>
+        <%= form.text_field :custom_slug, class: "form-control", 
+            placeholder: t("shortened_links.form.custom_slug_placeholder") %>
+        <p class="form-hint"><%= t("shortened_links.form.custom_slug_hint") %></p>
+      </div>
+
+      <div class="form-group">
+        <%= form.label :expires_at, t("shortened_links.form.expires_at") %>
+        <%= form.datetime_local_field :expires_at, class: "form-control" %>
+        <p class="form-hint"><%= t("shortened_links.form.expires_hint") %></p>
+      </div>
+    </div>
+
+    <!-- Schema Configuration -->
+    <div class="card">
+      <h3><%= t("shortened_links.form.content_config") %></h3>
+      
+      <div class="form-group">
+        <%= form.label :schema_type, t("shortened_links.form.schema_type") %>
+        <%= form.select :schema_type, 
+            options_for_select([
+              [t("shortened_links.form.schema_types.url"), "url"],
+              [t("shortened_links.form.schema_types.phone"), "phone"],
+              [t("shortened_links.form.schema_types.sms"), "sms"],
+              [t("shortened_links.form.schema_types.email"), "email"],
+              [t("shortened_links.form.schema_types.whatsapp"), "whatsapp"]
+            ], @shortened_link.schema_type),
+            {}, 
+            { class: "select", 
+              data: { action: "change->url-shortener#updateFields" } } %>
+      </div>
+
+      <!-- Dynamic fields container -->
+      <div data-url-shortener-target="dynamicFields">
+        <!-- URL fields -->
+        <div data-schema="url" class="<%= 'hidden' unless @shortened_link.url? || @shortened_link.schema_type.blank? %>">
+          <div class="form-group">
+            <%= form.label :target_value, "Website URL" %>
+            <%= form.url_field :target_value, 
+                class: "form-control", 
+                placeholder: t("shortened_links.form.url_placeholder"),
+                data: { schema: "url" } %>
+          </div>
+          
+          <!-- UTM Parameters -->
+          <div class="form-group">
+            <label class="font-medium text-sm">UTM Tracking (Optional)</label>
+            <div class="grid grid-cols-3 gap-2 mt-2">
+              <%= form.text_field :utm_source, 
+                  class: "form-control form-control-sm", 
+                  placeholder: t("shortened_links.form.utm_source") %>
+              <%= form.text_field :utm_medium, 
+                  class: "form-control form-control-sm", 
+                  placeholder: t("shortened_links.form.utm_medium") %>
+              <%= form.text_field :utm_campaign, 
+                  class: "form-control form-control-sm", 
+                  placeholder: t("shortened_links.form.utm_campaign") %>
+            </div>
+          </div>
+        </div>
+
+        <!-- Phone fields -->
+        <div data-schema="phone" class="<%= 'hidden' unless @shortened_link.phone? %>">
+          <div class="form-group">
+            <%= form.label :target_value, "Phone Number" %>
+            <%= form.telephone_field :target_value, 
+                class: "form-control", 
+                placeholder: t("shortened_links.form.phone_placeholder"),
+                data: { schema: "phone" } %>
+            <p class="form-hint">Include country code (e.g., +1234567890)</p>
+          </div>
+        </div>
+
+        <!-- SMS fields -->
+        <div data-schema="sms" class="<%= 'hidden' unless @shortened_link.sms? %>">
+          <div class="form-group">
+            <%= form.label :target_value, "Phone Number" %>
+            <%= form.telephone_field :target_value, 
+                class: "form-control", 
+                placeholder: t("shortened_links.form.phone_placeholder"),
+                data: { schema: "sms" } %>
+          </div>
+          
+          <div class="form-group">
+            <%= form.label :message, t("shortened_links.form.message") %>
+            <%= form.text_area :message, 
+                class: "form-control", 
+                rows: 3,
+                placeholder: "Pre-filled SMS message" %>
+          </div>
+        </div>
+
+        <!-- Email fields -->
+        <div data-schema="email" class="<%= 'hidden' unless @shortened_link.email? %>">
+          <div class="form-group">
+            <%= form.label :target_value, "Email Address" %>
+            <%= form.email_field :target_value, 
+                class: "form-control", 
+                placeholder: t("shortened_links.form.email_placeholder"),
+                data: { schema: "email" } %>
+          </div>
+          
+          <div class="form-group">
+            <%= form.label :subject, t("shortened_links.form.subject") %>
+            <%= form.text_field :subject, 
+                class: "form-control",
+                placeholder: "Email subject" %>
+          </div>
+          
+          <div class="form-group">
+            <%= form.label :message, t("shortened_links.form.message") %>
+            <%= form.text_area :message, 
+                class: "form-control", 
+                rows: 3,
+                placeholder: "Email body" %>
+          </div>
+        </div>
+
+        <!-- WhatsApp fields -->
+        <div data-schema="whatsapp" class="<%= 'hidden' unless @shortened_link.whatsapp? %>">
+          <div class="form-group">
+            <%= form.label :target_value, "WhatsApp Number" %>
+            <%= form.telephone_field :target_value, 
+                class: "form-control", 
+                placeholder: t("shortened_links.form.phone_placeholder"),
+                data: { schema: "whatsapp" } %>
+            <p class="form-hint">Include country code without + (e.g., 1234567890)</p>
+          </div>
+          
+          <div class="form-group">
+            <%= form.label :message, t("shortened_links.form.message") %>
+            <%= form.text_area :message, 
+                class: "form-control", 
+                rows: 3,
+                placeholder: "Pre-filled WhatsApp message" %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-6 space-x-2">
+    <%= form.submit class: "btn btn-primary" %>
+    <%= link_to "Cancel", account_shortened_links_path(current_account), 
+        class: "btn btn-secondary" %>
+  </div>
+<% end %>

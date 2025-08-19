@@ -1,0 +1,109 @@
+<% content_for :title, t('playlist_items.edit.title') %>
+
+<div class="container mx-auto max-w-2xl p-4">
+  <div class="mb-6">
+    <%= link_to qr_code_playlist_path(@qr_code), class: "btn btn-secondary btn-sm" do %>
+      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+      <%= t('playlist_items.back_to_playlist') %>
+    <% end %>
+    
+    <h1 class="text-2xl font-bold mt-4"><%= t('playlist_items.edit.heading', title: @playlist_item.title) %></h1>
+    <p class="text-gray-600"><%= t('playlist_items.edit.description', qr_code_name: @qr_code.name) %></p>
+  </div>
+
+  <div class="card">
+    <%= form_with model: @playlist_item, url: qr_code_playlist_playlist_item_path(@qr_code, @playlist, @playlist_item), local: true, class: "space-y-6" do |form| %>
+      <% if @playlist_item.errors.any? %>
+        <div class="alert alert-danger">
+          <h4><%= pluralize(@playlist_item.errors.count, "error") %> prohibited this item from being saved:</h4>
+          <ul class="list-disc list-inside mt-2">
+            <% @playlist_item.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <!-- Basic Information -->
+      <div class="form-group">
+        <%= form.label :title, t('playlist_items.form.title'), class: "form-label" %>
+        <%= form.text_field :title, class: "form-control", placeholder: t('playlist_items.form.title_placeholder') %>
+        <p class="form-hint"><%= t('playlist_items.form.title_hint') %></p>
+      </div>
+
+      <!-- QR Content Builder Component -->
+      <%= render "qr_content/builder_component",
+          field_name_prefix: "playlist_item",
+          linkable: @playlist_item,
+          stimulus_controller: "schema-switcher",
+          current_schema: @playlist_item.schema_type || "url",
+          schema_types: QrCode::SCHEMA_TYPES,
+          compact: false %>
+
+      <!-- Current Status -->
+      <% if @playlist.current_item == @playlist_item %>
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div class="flex items-center">
+            <svg class="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div>
+              <p class="font-medium text-blue-900"><%= t('playlist_items.current_status') %></p>
+              <p class="text-sm text-blue-700"><%= t('playlist_items.current_status_hint') %></p>
+            </div>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Actions -->
+      <div class="flex justify-end space-x-4">
+        <%= link_to t('common.cancel'), qr_code_playlist_path(@qr_code), class: "btn btn-secondary" %>
+        <%= form.submit t('playlist_items.form.update_item'), class: "btn btn-primary" %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<style>
+  .card {
+    @apply bg-white rounded-lg border border-gray-200 p-6 shadow-sm;
+  }
+  
+  .btn {
+    @apply inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2;
+  }
+  
+  .btn-primary {
+    @apply text-white bg-blue-600 hover:bg-blue-700 focus:ring-blue-500;
+  }
+  
+  .btn-secondary {
+    @apply text-gray-700 bg-white border-gray-300 hover:bg-gray-50 focus:ring-blue-500;
+  }
+  
+  .btn-sm {
+    @apply px-3 py-1.5 text-xs;
+  }
+  
+  .form-group {
+    @apply space-y-1;
+  }
+  
+  .form-label {
+    @apply block text-sm font-medium text-gray-700;
+  }
+  
+  .form-control {
+    @apply mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500;
+  }
+  
+  .form-hint {
+    @apply mt-1 text-sm text-gray-500;
+  }
+  
+  .alert-danger {
+    @apply bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative;
+  }
+</style>

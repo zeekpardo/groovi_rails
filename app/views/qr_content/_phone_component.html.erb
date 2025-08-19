@@ -1,0 +1,19 @@
+<%
+  field_name_prefix = local_assigns.fetch(:field_name_prefix, "shortened_link")
+  value = local_assigns.fetch(:value, "")
+  placeholder = local_assigns.fetch(:placeholder, "+1234567890")
+  required = local_assigns.fetch(:required, false)
+%>
+
+<div class="form-group">
+  <%= label_tag "#{field_name_prefix}_target_value", t("qr_codes.form.phone_number") %>
+  <%= telephone_field_tag "#{field_name_prefix}[target_value]", 
+      value,
+      class: "form-control",
+      placeholder: placeholder,
+      required: required,
+      data: { 
+        action: "input->schema-switcher#updatePreview"
+      } %>
+  <p class="form-hint"><%= t("qr_codes.form.phone_hint") %></p>
+</div>

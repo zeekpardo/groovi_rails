@@ -1,0 +1,33 @@
+<%
+  field_name_prefix = local_assigns.fetch(:field_name_prefix, "shortened_link")
+  phone_value = local_assigns.fetch(:phone_value, "")
+  message_value = local_assigns.fetch(:message_value, "")
+  required = local_assigns.fetch(:required, false)
+%>
+
+<div class="space-y-3">
+  <div class="form-group">
+    <%= label_tag "#{field_name_prefix}_target_value", t("qr_codes.form.sms_number") %>
+    <%= telephone_field_tag "#{field_name_prefix}[target_value]", 
+        phone_value,
+        class: "form-control",
+        placeholder: "+1234567890",
+        required: required,
+        data: { 
+          action: "input->schema-switcher#updatePreview"
+        } %>
+    <p class="form-hint"><%= t("qr_codes.form.phone_hint") %></p>
+  </div>
+  
+  <div class="form-group">
+    <%= label_tag "#{field_name_prefix}_metadata_message", t("qr_codes.form.sms_message") %>
+    <%= text_area_tag "#{field_name_prefix}[metadata][message]", 
+        message_value,
+        class: "form-control",
+        rows: 3,
+        placeholder: t("qr_codes.form.sms_message_placeholder"),
+        data: { 
+          action: "input->schema-switcher#updatePreview"
+        } %>
+  </div>
+</div>

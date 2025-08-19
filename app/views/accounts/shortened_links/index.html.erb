@@ -1,0 +1,99 @@
+<% content_for :title, t(".title") %>
+
+<div class="container mx-auto p-4">
+  <!-- Header with action -->
+  <div class="card card-cta-basic mb-6">
+    <div class="lg:flex-1">
+      <h1><%= t(".title") %></h1>
+      <p><%= t(".description") %></p>
+    </div>
+    <div class="lg:p-0 pt-4">
+      <%= link_to t(".new_link"), new_account_shortened_link_path(current_account), 
+          class: "btn btn-primary" %>
+    </div>
+  </div>
+
+  <% if @shortened_links.any? %>
+    <!-- Links table -->
+    <div class="card">
+      <div class="overflow-x-auto">
+        <table class="table">
+          <thead>
+            <tr>
+              <th><%= t(".columns.title") %></th>
+              <th><%= t(".columns.schema_type") %></th>
+              <th><%= t(".columns.short_code") %></th>
+              <th><%= t(".columns.clicks") %></th>
+              <th><%= t(".columns.status") %></th>
+              <th><%= t(".columns.actions") %></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @shortened_links.each do |link| %>
+              <tr>
+                <td>
+                  <strong><%= link.title %></strong>
+                  <% if link.description.present? %>
+                    <br><small class="text-gray-600"><%= truncate(link.description, length: 50) %></small>
+                  <% end %>
+                </td>
+                <td>
+                  <span class="pill pill-sm <%= schema_color(link.schema_type) %>">
+                    <%= t("shortened_links.form.schema_types.#{link.schema_type}") %>
+                  </span>
+                </td>
+                <td>
+                  <code class="text-sm"><%= link.short_code %></code>
+                  <button 
+                    class="btn btn-link btn-sm ml-2" 
+                    data-controller="clipboard" 
+                    data-clipboard-text-value="<%= formatted_short_url(link) %>">
+                    <%= t("shortened_links.show.copy_link") %>
+                  </button>
+                </td>
+                <td>
+                  <span class="font-bold"><%= number_with_delimiter(link.click_count) %></span>
+                </td>
+                <td>
+                  <% if link.expired? %>
+                    <span class="pill pill-sm pill-danger"><%= t("shortened_links.show.expired") %></span>
+                  <% elsif link.active? %>
+                    <span class="pill pill-sm pill-success"><%= t("shortened_links.show.active") %></span>
+                  <% else %>
+                    <span class="pill pill-sm pill-secondary"><%= t("shortened_links.show.inactive") %></span>
+                  <% end %>
+                </td>
+                <td>
+                  <div class="space-x-2">
+                    <%= link_to t("common.show"), account_shortened_link_path(current_account, link), 
+                        class: "btn btn-secondary btn-sm" %>
+                    <%= link_to t("common.edit"), edit_account_shortened_link_path(current_account, link), 
+                        class: "btn btn-secondary btn-sm" %>
+                    <%= button_to link.active? ? t("common.inactive") : t("common.active"), 
+                        toggle_active_account_shortened_link_path(current_account, link), 
+                        method: :post, 
+                        class: "btn btn-secondary btn-sm" %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Pagination -->
+      <% if respond_to?(:pagy_nav) %>
+        <div class="mt-4">
+          <%== pagy_nav(@pagy) if @pagy.pages > 1 %>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <!-- Empty state -->
+    <div class="card text-center py-12">
+      <h3 class="text-gray-600 mb-4"><%= t(".empty_state") %></h3>
+      <%= link_to t(".new_link"), new_account_shortened_link_path(current_account), 
+          class: "btn btn-primary" %>
+    </div>
+  <% end %>
+</div>

@@ -1,0 +1,130 @@
+<% content_for :title, t("qr_codes.index.title") %>
+
+<div class="container mx-auto p-4">
+  <!-- Header with action -->
+  <div class="card card-cta-basic mb-6">
+    <div class="lg:flex-1">
+      <h1><%= t("qr_codes.index.title") %></h1>
+      <p><%= t("qr_codes.index.description") %></p>
+    </div>
+    <div class="lg:p-0 pt-4">
+      <%= link_to t("qr_codes.index.new_qr_code"), new_qr_code_path, 
+          class: "btn btn-primary" %>
+    </div>
+  </div>
+
+  <% if @qr_codes.any? %>
+    <!-- QR codes grid -->
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <% @qr_codes.each do |qr_code| %>
+        <div class="card">
+          <!-- QR code preview -->
+          <div class="text-center mb-4">
+            <% design_settings = qr_code.design_settings_with_defaults %>
+            <%= render QrCodeComponent.new(
+                  data: qr_code.linkable.full_url,
+                  size: 150,
+                  foreground_color: design_settings[:foreground_color],
+                  background_color: design_settings[:background_color],
+                  container_class: "qr-index-preview"
+                ) do |component| %>
+              <!-- QR Code for <%= qr_code.name %> -->
+            <% end %>
+          </div>
+
+          <!-- QR code info -->
+          <div class="mb-4">
+            <h3 class="font-bold mb-2"><%= qr_code.name %></h3>
+            
+            <!-- Linkable info -->
+            <div class="mb-2">
+              <span class="pill pill-sm <%= qr_code.linkable.is_a?(ShortenedLink) ? 'pill-primary' : 'pill-secondary' %>">
+                <%= qr_code.linkable.class.name.humanize %>
+              </span>
+              <% if qr_code.linkable.respond_to?(:schema_type) %>
+                <span class="pill pill-sm pill-info ml-1">
+                  <%= t("shortened_links.form.schema_types.#{qr_code.linkable.schema_type}") %>
+                </span>
+              <% end %>
+            </div>
+            
+            <!-- Target info -->
+            <p class="text-sm text-gray-600">
+              <strong><%= t("qr_codes.index.target") %>:</strong> 
+              <%= truncate(qr_code.linkable_title, length: 30) %>
+            </p>
+            
+            <!-- Stats -->
+            <div class="flex justify-between text-sm text-gray-500 mt-2">
+              <span>
+                <i class="fas fa-download"></i>
+                <%= number_with_delimiter(qr_code.download_count) %> <%= t("qr_codes.index.downloads") %>
+              </span>
+              <span>
+                <i class="fas fa-eye"></i>
+                <%= number_with_delimiter(qr_code.scan_count) %> <%= t("qr_codes.index.scans") %>
+              </span>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="flex space-x-2">
+            <%= link_to t("common.show"), qr_code_path(qr_code), 
+                class: "btn btn-secondary btn-sm flex-1" %>
+            <%= link_to t("common.edit"), edit_qr_code_path(qr_code), 
+                class: "btn btn-secondary btn-sm flex-1" %>
+          </div>
+          
+          <!-- Quick download -->
+          <div class="mt-2 flex space-x-1">
+            <%= link_to "PNG", download_qr_code_path(qr_code, format: 'png', size: 300), 
+                class: "btn btn-link btn-sm flex-1", 
+                target: "_blank" %>
+            <%= link_to "SVG", download_qr_code_path(qr_code, format: 'svg', size: 300), 
+                class: "btn btn-link btn-sm flex-1",
+                target: "_blank" %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+    
+    <!-- Pagination -->
+    <% if @pagy.last > 1 %>
+      <div class="mt-6 text-center">
+        <%== @pagy.series_nav %>
+      </div>
+    <% end %>
+  <% else %>
+    <!-- Empty state -->
+    <div class="card text-center py-12">
+      <div class="text-6xl text-gray-300 mb-4">📱</div>
+      <h3 class="text-gray-600 mb-4"><%= t("qr_codes.index.empty_state") %></h3>
+      <p class="text-gray-500 mb-6"><%= t("qr_codes.index.empty_state_description") %></p>
+      
+      <div class="space-x-4">
+        <%= link_to t("qr_codes.index.new_qr_code"), new_qr_code_path, 
+            class: "btn btn-primary" %>
+        <%= link_to t("qr_codes.index.create_link_first"), new_account_shortened_link_path(current_account), 
+            class: "btn btn-secondary" %>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<style>
+.qr-index-preview .qr-code-display {
+  min-height: 150px;
+  max-width: 150px;
+  margin: 0 auto;
+}
+
+.qr-index-preview .qr-display-area svg {
+  max-width: 150px;
+  max-height: 150px;
+}
+
+.qr-index-preview .qr-display-area img {
+  max-width: 150px;
+  max-height: 150px;
+}
+</style>

@@ -1,0 +1,7 @@
+<% content_for :title, t('playlist_items.new.title') %>
+
+<%= render PlaylistItemComposerModalComponent.new(
+  qr_code: @qr_code,
+  playlist: @playlist,
+  playlist_item: @playlist_item
+) %>
