@@ -44,7 +44,7 @@ gem "thruster", require: false
 gem "image_processing", "~> 1.12"
 
 # QR code generation (rqrcode already included in Jumpstart Pro)
-gem "mini_magick", "~> 4.12"
+gem "mini_magick", "~> 5.3"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
